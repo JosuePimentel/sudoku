@@ -5,8 +5,21 @@
 #define lin 9
 #define col 9
 
-int verLineCol(int game[][col], int index, int l, int c, int thereIs) {
+void verMatriz(int game[][col], int *p, int Ai, int Af, int Bi, int Bf) {
+    int z;
+    for( z = 0 ; z < lin ; z++ ) {
+        for( Ai ; Ai < Af; Ai++ ) {
+            for( Bi ; Bi < Bf ; Bi++ ) {
+                if(game[Ai][Bi] == z+1) *p++;
+            }
+        }
+    }
+}
+
+int verLineCol(int game[][col], int index, int l, int c, int thereIs, int *over, int key) {
     int x,y;
+    int complete = 0;
+    int *p = &complete;
     for( x = 0 ; x < lin ; x++ ) {
         if(game[x][c] ==  index) thereIs++;
         for( y = 0 ; y < col ; y++ ) {
@@ -17,76 +30,94 @@ int verLineCol(int game[][col], int index, int l, int c, int thereIs) {
                 for( a = 0 ; a <= 2 ; a++) {
                     for( b = 0 ; b <= 2 ; b++ ) {
                         if(game[a][b] == index) thereIs++;
+                        verMatriz(game, p, 0, 2, 0, 2);
+                        if(complete && key) *over++;
                     }
                 }
             } else if((l>=0 && l<=2) && (c>=3 && c<=5)) {
                 for( a = 0 ; a <= 2 ; a++) {
                     for( b = 3 ; b <= 5 ; b++ ) {
                         if(game[a][b] == index) thereIs++;
+                        verMatriz(game, p, 0, 2, 3, 5);
+                        if(complete >= 9 && key) *over++;
                     }
                 }
             } else if((l>=0 && l<=2) && (c>=6 && c<=8)) {
                 for( a = 0 ; a <= 2 ; a++) {
                     for( b = 6 ; b <= 8 ; b++ ) {
                         if(game[a][b] == index) thereIs++;
+                        verMatriz(game, p, 0, 2, 6, 8);
+                        if(complete >= 9 && key) *over++;
                     }
                 }
             } else if((l>=3 && l<=5) && (c>=0 && c<=2)) {
                 for( a = 3 ; a <= 5 ; a++) {
                     for( b = 0 ; b <= 2 ; b++ ) {
                         if(game[a][b] == index) thereIs++;
+                        verMatriz(game, p, 3, 5, 0, 2);
+                        if(complete >= 9 && key) *over++;
                     }
                 }
             } else if((l>=3 && l<=5) && (c>=3 && c<=5)) {
                 for( a = 3 ; a <= 5 ; a++) {
                     for( b = 3 ; b <= 5 ; b++ ) {
                         if(game[a][b] == index) thereIs++;
+                        verMatriz(game, p, 3, 5, 3, 5);
+                        if(complete >= 9 && key) *over++;
                     }
                 }
             } else if((l>=3 && l<=5) && (c>=6 && c<=8)) {
                 for( a = 3 ; a <= 5 ; a++) {
                     for( b = 6 ; b <= 8 ; b++ ) {
                         if(game[a][b] == index) thereIs++;
+                        verMatriz(game, p, 3, 5, 6, 8);
+                        if(complete >= 9 && key) *over++;
                     }
                 }
             } else if((l>=6 && l<=8) && (c>=0 && c<=2)) {
                 for( a = 6 ; a <= 8 ; a++) {
                     for( b = 0 ; b <= 2 ; b++ ) {
                         if(game[a][b] == index) thereIs++;
+                        verMatriz(game, p, 6, 8, 0, 2);
+                        if(complete >= 9 && key) *over++;
                     }
                 }
             } else if((l>=6 && l<=8) && (c>=3 && c<=5)) {
                 for( a = 6 ; a <= 8 ; a++) {
                     for( b = 3 ; b <= 5 ; b++ ) {
                         if(game[a][b] == index) thereIs++;
+                        verMatriz(game, p, 6, 8, 3, 5);
+                        if(complete >= 9 && key) *over++;
                     }
                 }
             } else if((l>=6 && l<=8) && (c>=6 && c<=8)) {
                 for( a = 6 ; a <= 8 ; a++) {
                     for( b = 6 ; b <= 8 ; b++ ) {
                         if(game[a][b] == index) thereIs++;
+                        verMatriz(game, p, 6, 8, 6, 8);
+                        if(complete >= 9 && key) *over++;
                     }
                 }
             }
         }
     }
-
     return thereIs;
 }
-void preencherJogo(int game[][col], int index, int l, int c) {
+
+void preencherJogo(int game[][col], int index, int l, int c, int *over) {
     int x,y;
     int thereIs = 0;
-    thereIs = verLineCol(game, index, l, c, thereIs);
+    thereIs = verLineCol(game, index, l, c, thereIs, over, 1);
     for( x = 0 ; x < lin ; x++ ) {
         for( y = 0 ; y < col ; y++ ) {
             if(index == -1) game[x][y] = 0;
-            else if(l == x && c == y && !thereIs) game[x][y] = index;
+            else if(!thereIs) game[l][c] = index;
         }
     }
     thereIs = 0;
 }
 
-void numAleatorios(int game[][col]) {
+void numAleatorios(int game[][col], int *over) {
     int count = 30;
     while(count) {
         int  thereIs = 0;
@@ -96,9 +127,9 @@ void numAleatorios(int game[][col]) {
         int l = round(rand() % 9);
         int c = round(rand() % 9);
 
-        thereIs = verLineCol(game, nb, l, c, thereIs);
+        thereIs = verLineCol(game, nb, l, c, thereIs, over, 0);
         if(!thereIs && game[l][c] == 0 && nb != 0) {
-            preencherJogo(game, nb, l, c);
+            preencherJogo(game, nb, l, c, over);
             count--;
         }
     }
@@ -133,22 +164,24 @@ void escreverJogo(int game[][col]) {
 
 int main(){
 
-    int game[lin][col];
-    preencherJogo(game,-1,0,0);
-    numAleatorios(game);
+    int game[lin][col], over = 0, *p = &over;
+    preencherJogo(game,-1,0,0,p);
+    numAleatorios(game,p);
     escreverJogo(game);
 
     int nb, linha, coluna;
 
-    while(1) {
+    while(!over) {
         printf("Escreva o proximo passo:");
         scanf("%i %i %i", &nb, &linha, &coluna);
         if((nb >= 1 && nb <= 9) && (linha >= 0 && linha <= 8) && (coluna >= 0 && coluna <= 8)) {
-            preencherJogo(game, nb, linha, coluna);
+            preencherJogo(game, nb, linha, coluna, p);
             escreverJogo(game);
         } else {
             printf("Algum passo foi escrito fora do intervalo, rescreva!\n");
         }
+
+        printf("%i", over);
     }
 
 
